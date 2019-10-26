@@ -2,6 +2,8 @@ const vertexSource = require('./shaders/vertex');
 const fragmentSource = require('./shaders/fragment');
 import {mat4} from 'gl-matrix'
 
+/*eslint-disable*/
+
 export const initGL = () => {
     const canvas = document.getElementById('glCanvas');
     const gl = canvas.getContext('webgl'); // WebGL context Initialization
@@ -47,7 +49,7 @@ export const initGL = () => {
     const modelViewMatrixLocation = gl.getUniformLocation(program, 'uModelViewMatrix');
 
     let u_Color = gl.getUniformLocation(program, 'u_Color');
-    gl.uniform4f(u_Color, 1.0, 0.7, 1.0, 1.0);
+    gl.uniform4f(u_Color, 1.0, 1.0, 1.0, 1.0);
 
 
     const positionBuffer = gl.createBuffer();
@@ -68,11 +70,9 @@ export const initGL = () => {
     const modelViewMatrix = mat4.create();
 
     // mat4.identity(modelViewMatrix);
-    mat4.perspective(projectionMatrix, 45, gl.canvas.clientWidth / gl.canvas.clientHeight, 1, 100.0); //camera position
-    mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, -3]); //view x,y,z (move model to left-right or forward-back)
+    mat4.perspective(projectionMatrix, 45 * Math.PI / 180, gl.canvas.clientWidth / gl.canvas.clientHeight, 0.1, 100.0); //camera position
+    mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, -2]); //view x,y,z (move model to left-right or forward-back)
     mat4.scale(modelViewMatrix, modelViewMatrix, [1, 1, 1]); // scale x,y,z
-
-    console.log("main " + modelViewMatrix);
 
     //Draw the triangle
 
@@ -83,18 +83,16 @@ export const initGL = () => {
     gl.uniformMatrix4fv(projectionMatrixLocation, false, projectionMatrix); //Set matrix value
     gl.uniformMatrix4fv(modelViewMatrixLocation, false, modelViewMatrix);
     // Specify details of how to pull the data out of positionBuffer
-    const offset = 0;
-    const count = 3;
-    gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, offset);//bind vertexAttribute to the current ARRAY_BUFFER
+    gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0);//bind vertexAttribute to the current ARRAY_BUFFER
     // Now we are able to change the ARRAY_BUFFER
-    gl.drawArrays(gl.TRIANGLES, offset, count);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     //Push all required data in one object for easier management
     return {
         gl,
         program,
         triangle,
-        Positions: {
+        Locations: {
             vertexPosition,
             projectionMatrixLocation,
             modelViewMatrixLocation
@@ -105,15 +103,29 @@ export const initGL = () => {
         Matrices: {
             projectionMatrix,
             modelViewMatrix
-        },
-        count
+        }
     }
 };
 
-export const startRotation = (Data) => {
-    const {gl, program, triangle, Positons, Colors, Matrices, count} = Data;
+export const handleRotation = (Data, turn = 1, key) => {
+    const {gl, program, triangle, Locations, Colors, Matrices} = Data;
+    gl.useProgram(program);
+    clearInterval(key);
     const Rotate = () => {
-
-    }
+        mat4.rotateY(Matrices.modelViewMatrix, Matrices.modelViewMatrix, turn * Math.PI / 180);
+        gl.clearColor(0, 0, 0, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, triangle, gl.STATIC_DRAW);
+        gl.uniformMatrix4fv(Locations.modelViewMatrixLocation, false, Matrices.modelViewMatrix);
+        gl.vertexAttribPointer(Locations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.flush()
+    };
+    return setInterval(() => {   //Start animation and return the setInterval's ID Key
+        Rotate()                        //to be able to call clearInterval if there will be a new call of this function
+    }, 20);
 };
+
 

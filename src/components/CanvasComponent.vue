@@ -4,29 +4,29 @@
         <canvas id="glCanvas" width="400" height="400">
         </canvas>
         <div id="buttons">
-            <button class="button" name="start" @click="startAnimation">Start Rotation</button>
-            <div id="controlButtons">
-                <button class="button" name="reverse" @click="startAnimation">Reverse Rotation</button>
-                <button class="button" name="color" @click="startAnimation">Change Color</button>
-            </div>
+            <button class="button" name="reverse" @click="reverseAnimation">Start rotation or change direction.</button>
+            <button class="button" name="color" @click="reverseAnimation">Change Color</button>
         </div>
     </div>
 </template>
 
 <script>
-    import {initGL, startRotation} from "@/components/webGL";
+    import {initGL, handleRotation} from "@/components/webGL";
 
     export default {
         data() {
             return {
-                Data: {}
+                Data: {},
+                turn: -1, //If turn is set to -1, then rotation changes to the opposite, and vice versa
+                key: '' //Key to apply clearInterval(key) in handleRotation function to reset the animation
             }
         },
         name: 'CanvasComponent',
         methods: {
-            startAnimation() {
-                startRotation(this.Data)
-            },
+            reverseAnimation() {
+                this.turn = this.turn * -1;
+                this.key = handleRotation(this.Data, this.turn, this.key);
+            }
         },
         mounted() {
             this.Data = initGL()
@@ -50,17 +50,13 @@
 
     #buttons {
         display: flex;
+        justify-content: space-around;
     }
 
     .button {
-        max-width: 80px;
+        border-radius: 5px;
+        max-width: 150px;
         height: 40px;
     }
 
-    #controlButtons {
-        display: flex;
-        justify-content: space-between;
-        width: 170px;
-        margin-left: auto;
-    }
 </style>
