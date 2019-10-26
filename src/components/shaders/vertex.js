@@ -1,8 +1,10 @@
 const vertexShader = `
-attribute vec4 vertexPosition;
+attribute vec3 vertexPosition;
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
 
 void main() {
-    gl_Position = vertexPosition;
+    gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(vertexPosition, 1.0);
 }
 `;
 
