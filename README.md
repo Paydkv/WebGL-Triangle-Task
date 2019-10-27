@@ -1,4 +1,9 @@
-# taskwebgl
+# WebGL Triangle Task
+
+This is SPA created with Vue.js
+There is 2D triangle in WebGL 3D environment that automaticly rotates by Y-axis and changes its color.
+Two buttons added: - rotation direction change
+                   - color sequence change
 
 ## Project setup
 ```
