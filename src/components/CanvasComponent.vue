@@ -5,27 +5,40 @@
         </canvas>
         <div id="buttons">
             <button class="button" name="reverse" @click="reverseAnimation">Start rotation or change direction.</button>
-            <button class="button" name="color" @click="reverseAnimation">Change Color</button>
+            <button class="button" name="stop" @click="stopAnimation">Stop rotation</button>
+            <button class="button" name="color" @click="colorSequenceChange">Randomly chosen color sequence</button>
         </div>
     </div>
 </template>
 
 <script>
-    import {initGL, handleRotation} from "@/components/webGL";
+    import {initGL, handleWebGL, stopRotation} from "@/components/webGL";
 
     export default {
         data() {
             return {
                 Data: {},
-                turn: -1, //If turn is set to -1, then rotation changes to the opposite, and vice versa
-                key: '' //Key to apply clearInterval(key) in handleRotation function to reset the animation
+                direction: -1, //If this parameter is set to -1, then rotation changes to the opposite, and vice versa
+                ID: 0, //Key to apply clearInterval(key) in handleRotation function to reset the animation
+                axes: [1, 0, 0], //Set the default color sequence to: red -> green -> white -> red
+                colorSequences: [[0, 0, 1], [0, 1, 0], [0, 1, 1], [1, 0, 0], [1, 0, 1], [1, 1, 0]]
             }
         },
         name: 'CanvasComponent',
         methods: {
+            startAnimation() {
+
+            },
             reverseAnimation() {
-                this.turn = this.turn * -1;
-                this.key = handleRotation(this.Data, this.turn, this.key);
+                this.direction = this.direction * -1;
+                this.ID = handleWebGL(this.Data, this.direction, this.ID, [...this.axes])
+            },
+            stopAnimation() {
+                stopRotation(this.ID)
+            },
+            colorSequenceChange() {
+                this.axes = this.colorSequences[Math.floor(Math.random() * 5)];
+                this.ID = handleWebGL(this.Data, this.direction, this.ID, [...this.axes])
             }
         },
         mounted() {
@@ -58,5 +71,4 @@
         max-width: 150px;
         height: 40px;
     }
-
 </style>
